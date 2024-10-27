@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Mail Ballot Report</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <h1>
+      <span class="blue">&lt;</span>PA Daily Mail Ballot Report<span
+        class="blue"
+        >&gt;</span
+      >
+      <p class="update">updated through 10/25/2024 8:00 AM</p>
+    </h1>
+
+    <!-- Tab container to hold the date tabs -->
+    <div class="tab-container" id="tabContainer"></div>
+
+    <table class="container">
+      <thead>
+        <tr>
+          <th>County</th>
+          <th>Total Requests</th>
+          <th>Total Returns</th>
+          <th>Requests (D)</th>
+          <th>Requests (R)</th>
+          <th>Requests (NPA)</th>
+          <th>Returns (D)</th>
+          <th>Returns (R)</th>
+          <th>Returns (NPA)</th>
+          <th>Request Share (D)</th>
+          <th>Request Share (R)</th>
+          <th>Return Share (D)</th>
+          <th>Return Share (R)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data will be inserted here by JavaScript -->
+      </tbody>
+    </table>
+
+    <section class="daily-summary-row mt-4">
+      <div class="box bg-primary p-3">
+        <h3>Returns Share</h3>
+        <p>🔵 Democratic: <span id="demReturnShare"></span>% (<span id="demReturnShareChange"></span>)</p>
+        <p>🔴 Republican: <span id="repReturnShare"></span>% (<span id="repReturnShareChange"></span>)</p>
+      </div>
+      <div class="box bg-danger p-3">
+        <h3>Total Returns</h3>
+        <p>🔵 Democratic: <span id="demTotalReturns"></span> (+<span id="demReturnChange"></span>)</p>
+        <p>🔴 Republican: <span id="repTotalReturns"></span> (+<span id="repReturnChange"></span>)</p>
+      </div>
+      <div class="box bg-warning p-3">
+        <h3>Daily Net Advantage</h3>
+        <p>🔵 <span id="netAdvantage"></span></p>
+      </div>
+      <div class="box bg-success p-3">
+        <h3>Total Advantage</h3>
+        <p>🔵 <span id="totalAdvantage"></span></p>
+        <h3>Projected Advantage</h3>
+        <p>🔵 <span id="projectedAdvantage"></span></p>
+      </div>
+    </section>
+
+     <div class="chart-container">
+      <h2>Return Share Trend</h2>
+      <canvas id="shareTrendChart"></canvas>
+    </div>
+
+
+
+
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </body>
+</html>

@@ -1,0 +1,226 @@
+/*	
+	Table Responsive
+	===================
+	Author: https://github.com/pablorgarcia
+ */
+
+@charset "UTF-8";
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,700);
+
+body {
+  font-family: "Open Sans", sans-serif;
+  font-weight: 300;
+  line-height: 1.42em;
+  color: #a7a1ae;
+  background-color: #1f2739;
+}
+
+h1 {
+  font-size: 3em;
+  font-weight: 300;
+  line-height: 1em;
+  text-align: center;
+  color: #4dc3fa;
+}
+
+h2 {
+  font-size: 1em;
+  font-weight: 300;
+  text-align: center;
+  display: block;
+  line-height: 1em;
+  padding-bottom: 2em;
+  color: #fb667a;
+}
+
+h2 a {
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fb667a;
+  text-decoration: none;
+}
+
+h3 {
+  font-weight: 400;
+}
+
+.blue {
+  color: #185875;
+}
+.yellow {
+  color: #fff842;
+}
+
+.container th h1 {
+  font-weight: bold;
+  font-size: 1em;
+  text-align: left;
+  color: #185875;
+}
+
+.container td {
+  font-weight: normal;
+  font-size: 0.9em;
+  -webkit-box-shadow: 0 2px 2px -2px #0e1119;
+  -moz-box-shadow: 0 2px 2px -2px #0e1119;
+  box-shadow: 0 2px 2px -2px #0e1119;
+}
+
+/* Table styling */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 70vh; /* Set a max height for scroll */
+}
+
+/* Make header row sticky */
+thead th {
+  position: sticky;
+  top: 0;
+  background-color: #1f2739; /* Match header color */
+  color: #ffffff;
+  z-index: 2;
+  padding: 10px;
+}
+
+/* Style for the table cells */
+.container th,
+.container td {
+  padding: 10px;
+  text-align: left;
+  font-size: .8rem;
+}
+
+/* Other styles remain as they were */
+
+/* Background-color of the odd rows */
+.container tr:nth-child(odd) {
+  background-color: #323c50;
+}
+
+/* Background-color of the even rows */
+.container tr:nth-child(even) {
+  background-color: #2c3446;
+}
+
+.container th {
+  background-color: #1f2739;
+}
+
+.container td:first-child {
+  color: #fb667a;
+}
+
+.container tr:hover {
+  background-color: #464a52;
+  -webkit-box-shadow: 0 6px 6px -6px #0e1119;
+  -moz-box-shadow: 0 6px 6px -6px #0e1119;
+  box-shadow: 0 6px 6px -6px #0e1119;
+}
+
+.update {
+  font-size: 1rem;
+  color: #f57390e0;
+}
+
+.container td:hover {
+  background-color: #fff842;
+  color: #403e10;
+  font-weight: bold;
+
+  box-shadow: #7f7c21 -1px 1px, #7f7c21 -2px 2px, #7f7c21 -3px 3px,
+    #7f7c21 -4px 4px, #7f7c21 -5px 5px, #7f7c21 -6px 6px;
+  transform: translate3d(6px, -6px, 0);
+
+  transition-delay: 0s;
+  transition-duration: 0.4s;
+  transition-property: all;
+  transition-timing-function: line;
+}
+
+.totals-row {
+  background-color: #ff6b5438 !important;
+}
+
+.tab-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.tab {
+  background-color: #1f2739;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+.tab:hover {
+  background-color: #3d3d3d;
+}
+
+.tab.active {
+  background-color: #e7cf59;
+  color: #1f2739;
+  font-weight: bold;
+}
+
+/* Other styles remain as they were */
+
+@media (max-width: 800px) {
+  .container td:nth-child(4),
+  .container th:nth-child(4) {
+    display: none;
+  }
+}
+
+.data-summary,
+.chart-container {
+  max-width: 800px;
+  margin: 20px auto;
+  background-color: #2c3446;
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+}
+
+.daily-summary h3 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.daily-summary p {
+  margin: 5px 0;
+}
+
+.chart-container canvas {
+  max-width: 100%;
+}
+
+.daily-summary-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding-top: 15px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.daily-summary-row .box {
+  flex: 1;
+  min-width: 200px;
+  border-radius: 0.25rem;
+  color: #fff;
+  text-align: center;
+  background-color: #323c50;
+}
+
+.daily-summary-row h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
