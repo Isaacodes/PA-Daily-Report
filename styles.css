@@ -90,7 +90,7 @@ thead th {
 .container td {
   padding: 10px;
   text-align: left;
-  font-size: .8rem;
+  font-size: 0.8rem;
 }
 
 /* Other styles remain as they were */
@@ -209,6 +209,14 @@ thead th {
   padding-top: 15px;
   padding-left: 10px;
   padding-right: 10px;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: row;
+  align-content: flex-end;
+  align-items: stretch;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  margin: 0 auto;
 }
 
 .daily-summary-row .box {
