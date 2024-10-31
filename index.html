@@ -12,7 +12,7 @@
         class="blue"
         >&gt;</span
       >
-      <p class="update">updated through 10/25/2024 8:00 AM</p>
+      <p class="update">updated through 10/28/2024 8:00 AM</p>
     </h1>
 
     <!-- Tab container to hold the date tabs -->
@@ -44,13 +44,33 @@
     <section class="daily-summary-row mt-4">
       <div class="box bg-primary p-3">
         <h3>Returns Share</h3>
-        <p>🔵 Democratic: <span id="demReturnShare"></span>% (<span id="demReturnShareChange"></span>)</p>
-        <p>🔴 Republican: <span id="repReturnShare"></span>% (<span id="repReturnShareChange"></span>)</p>
+        <p>
+          🔵 Democratic: <span id="demReturnShare"></span>% (<span
+            id="demReturnShareChange"
+          ></span
+          >)
+        </p>
+        <p>
+          🔴 Republican: <span id="repReturnShare"></span>% (<span
+            id="repReturnShareChange"
+          ></span
+          >)
+        </p>
       </div>
       <div class="box bg-danger p-3">
         <h3>Total Returns</h3>
-        <p>🔵 Democratic: <span id="demTotalReturns"></span> (+<span id="demReturnChange"></span>)</p>
-        <p>🔴 Republican: <span id="repTotalReturns"></span> (+<span id="repReturnChange"></span>)</p>
+        <p>
+          🔵 Democratic: <span id="demTotalReturns"></span> (+<span
+            id="demReturnChange"
+          ></span
+          >)
+        </p>
+        <p>
+          🔴 Republican: <span id="repTotalReturns"></span> (+<span
+            id="repReturnChange"
+          ></span
+          >)
+        </p>
       </div>
       <div class="box bg-warning p-3">
         <h3>Daily Net Advantage</h3>
@@ -64,13 +84,10 @@
       </div>
     </section>
 
-     <div class="chart-container">
+    <div class="chart-container">
       <h2>Return Share Trend</h2>
       <canvas id="shareTrendChart"></canvas>
     </div>
-
-
-
 
     <script src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

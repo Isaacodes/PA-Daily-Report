@@ -13,6 +13,10 @@ body {
   line-height: 1.42em;
   color: #a7a1ae;
   background-color: #1f2739;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 h1 {

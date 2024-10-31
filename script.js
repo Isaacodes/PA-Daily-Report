@@ -5,20 +5,24 @@ document.addEventListener("DOMContentLoaded", function () {
   let files = [
     "data-2022-GE.json",
     "data-2020-GE.json",
-    "data-10-22-2024.json",
-    "data-10-24-2024.json",
-    "data-10-25-2024.json",
+    "data-10-29-2024.json",
+    "data-10-30-2024.json",
+    "data-10-31-2024.json",
   ];
 
-  // Sort files by date while keeping general election files (`GE`) in place
-  files.sort((a, b) => {
-    const dateA = a.match(/\d{2}-\d{2}-\d{4}/);
-    const dateB = b.match(/\d{2}-\d{2}-\d{4}/);
-    if (dateA && dateB) return new Date(dateB[0]) - new Date(dateA[0]);
-    else if (dateA) return -1;
-    else if (dateB) return 1;
-    return 0;
+  // Separate GE files from date-based files
+  const geFiles = files.filter((file) => file.includes("GE"));
+  const dateFiles = files.filter((file) => file.match(/\d{2}-\d{2}-\d{4}/));
+
+  // Sort date-based files by descending date (latest to oldest)
+  dateFiles.sort((a, b) => {
+    const dateA = new Date(a.match(/\d{2}-\d{2}-\d{4}/)[0]);
+    const dateB = new Date(b.match(/\d{2}-\d{2}-\d{4}/)[0]);
+    return dateB - dateA;
   });
+
+  // Merge sorted date files with GE files
+  files = [...dateFiles, ...geFiles];
 
   // Create tabs dynamically based on sorted files
   function createTabs() {
@@ -135,57 +139,58 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     totalsRow.innerHTML = `
-      <td><strong>Totals</strong></td>
-      <td>${formatCell(
-        totals.Total_Approved,
-        prevTotals ? prevTotals.Total_Approved : null
-      )}</td>
-      <td>${formatCell(
-        totals.Total_Returned,
-        prevTotals ? prevTotals.Total_Returned : null
-      )}</td>
-      <td>${formatCell(
-        totals.Raw_Dem_Approved,
-        prevTotals ? prevTotals.Raw_Dem_Approved : null
-      )}</td>
-      <td>${formatCell(
-        totals.Raw_Rep_Approved,
-        prevTotals ? prevTotals.Raw_Rep_Approved : null
-      )}</td>
-      <td>${formatCell(
-        totals.Raw_Oth_Approved,
-        prevTotals ? prevTotals.Raw_Oth_Approved : null
-      )}</td>
-      <td>${formatCell(
-        totals.Raw_Dem_Returned,
-        prevTotals ? prevTotals.Raw_Dem_Returned : null
-      )}</td>
-      <td>${formatCell(
-        totals.Raw_Rep_Returned,
-        prevTotals ? prevTotals.Raw_Rep_Returned : null
-      )}</td>
-      <td>${formatCell(
-        totals.Raw_Oth_Returned,
-        prevTotals ? prevTotals.Raw_Oth_Returned : null
-      )}</td>
-      <td>${formatCellWithPercentage(
-        totals.Request_Share_Dem,
-        prevTotals ? prevTotals.Request_Share_Dem : null
-      )}</td>
-      <td>${formatCellWithPercentage(
-        totals.Request_Share_Rep,
-        prevTotals ? prevTotals.Request_Share_Rep : null
-      )}</td>
-      <td>${formatCellWithPercentage(
-        totals.Return_Share_Dem,
-        prevTotals ? prevTotals.Return_Share_Dem : null
-      )}</td>
-      <td>${formatCellWithPercentage(
-        totals.Return_Share_Rep,
-        prevTotals ? prevTotals.Return_Share_Rep : null
-      )}</td>
-    `;
-    tableBody.appendChild(totalsRow);
+    <td><strong>Totals</strong></td>
+    <td>${formatCell(
+      totals.Total_Approved,
+      prevTotals ? prevTotals.Total_Approved : null
+    )}</td>
+    <td>${formatCell(
+      totals.Total_Returned,
+      prevTotals ? prevTotals.Total_Returned : null
+    )}</td>
+    <td>${formatCell(
+      totals.Raw_Dem_Approved,
+      prevTotals ? prevTotals.Raw_Dem_Approved : null
+    )}</td>
+    <td>${formatCell(
+      totals.Raw_Rep_Approved,
+      prevTotals ? prevTotals.Raw_Rep_Approved : null
+    )}</td>
+    <td>${formatCell(
+      totals.Raw_Oth_Approved,
+      prevTotals ? prevTotals.Raw_Oth_Approved : null
+    )}</td>
+    <td>${formatCell(
+      totals.Raw_Dem_Returned,
+      prevTotals ? prevTotals.Raw_Dem_Returned : null
+    )}</td>
+    <td>${formatCell(
+      totals.Raw_Rep_Returned,
+      prevTotals ? prevTotals.Raw_Rep_Returned : null
+    )}</td>
+    <td>${formatCell(
+      totals.Raw_Oth_Returned,
+      prevTotals ? prevTotals.Raw_Oth_Returned : null
+    )}</td>
+    <td>${formatCellWithPercentage(
+      totals.Request_Share_Dem,
+      prevTotals ? prevTotals.Request_Share_Dem : null
+    )}</td>
+    <td>${formatCellWithPercentage(
+      totals.Request_Share_Rep,
+      prevTotals ? prevTotals.Request_Share_Rep : null
+    )}</td>
+    <td>${formatCellWithPercentage(
+      totals.Return_Share_Dem,
+      prevTotals ? prevTotals.Return_Share_Dem : null
+    )}</td>
+    <td>${formatCellWithPercentage(
+      totals.Return_Share_Rep,
+      prevTotals ? prevTotals.Return_Share_Rep : null
+    )}</td>
+  `;
+
+    tableBody.prepend(totalsRow); // Use prepend instead of appendChild
   }
 
   // Insert row for each county with or without differences
@@ -283,9 +288,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const files = [
     "data-2022-GE.json",
     "data-2020-GE.json",
-    "data-10-22-2024.json",
-    "data-10-24-2024.json",
-    "data-10-25-2024.json",
+    "data-10-29-2024.json",
+    "data-10-30-2024.json",
+    "data-10-31-2024.json",
   ].sort((a, b) => {
     const dateA = a.match(/\d{2}-\d{2}-\d{4}/) || a.match(/data-(\d{4})-GE/);
     const dateB = b.match(/\d{2}-\d{2}-\d{4}/) || b.match(/data-(\d{4})-GE/);
@@ -434,38 +439,56 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function renderDailySummary(summary) {
-    document.getElementById("demReturnShare").textContent = summary.demReturnShare;
-    document.getElementById("demReturnShareChange").textContent = summary.demReturnShareChange;
-    document.getElementById("repReturnShare").textContent = summary.repReturnShare;
-    document.getElementById("repReturnShareChange").textContent = summary.repReturnShareChange;
-  
-    document.getElementById("demTotalReturns").textContent = summary.demTotalReturns;
-    document.getElementById("demReturnChange").textContent = summary.demReturnChange;
-    document.getElementById("repTotalReturns").textContent = summary.repTotalReturns;
-    document.getElementById("repReturnChange").textContent = summary.repReturnChange;
-  
+    document.getElementById("demReturnShare").textContent =
+      summary.demReturnShare;
+    document.getElementById("demReturnShareChange").textContent =
+      summary.demReturnShareChange;
+    document.getElementById("repReturnShare").textContent =
+      summary.repReturnShare;
+    document.getElementById("repReturnShareChange").textContent =
+      summary.repReturnShareChange;
+
+    document.getElementById("demTotalReturns").textContent =
+      summary.demTotalReturns;
+    document.getElementById("demReturnChange").textContent =
+      summary.demReturnChange;
+    document.getElementById("repTotalReturns").textContent =
+      summary.repTotalReturns;
+    document.getElementById("repReturnChange").textContent =
+      summary.repReturnChange;
+
     document.getElementById("netAdvantage").textContent = summary.netAdvantage;
-    document.getElementById("totalAdvantage").textContent = summary.totalAdvantage;
-    document.getElementById("projectedAdvantage").textContent = summary.projectedAdvantage;
+    document.getElementById("totalAdvantage").textContent =
+      summary.totalAdvantage;
+    document.getElementById("projectedAdvantage").textContent =
+      summary.projectedAdvantage;
   }
-  
 
   loadData();
 });
 
 function renderDailySummary(summary) {
-  document.getElementById("demReturnShare").textContent = summary.demReturnShare;
-  document.getElementById("demReturnShareChange").textContent = summary.demReturnShareChange;
-  document.getElementById("repReturnShare").textContent = summary.repReturnShare;
-  document.getElementById("repReturnShareChange").textContent = summary.repReturnShareChange;
+  document.getElementById("demReturnShare").textContent =
+    summary.demReturnShare;
+  document.getElementById("demReturnShareChange").textContent =
+    summary.demReturnShareChange;
+  document.getElementById("repReturnShare").textContent =
+    summary.repReturnShare;
+  document.getElementById("repReturnShareChange").textContent =
+    summary.repReturnShareChange;
 
-  document.getElementById("demTotalReturns").textContent = summary.demTotalReturns;
-  document.getElementById("demReturnChange").textContent = summary.demReturnChange;
-  document.getElementById("repTotalReturns").textContent = summary.repTotalReturns;
-  document.getElementById("repReturnChange").textContent = summary.repReturnChange;
+  document.getElementById("demTotalReturns").textContent =
+    summary.demTotalReturns;
+  document.getElementById("demReturnChange").textContent =
+    summary.demReturnChange;
+  document.getElementById("repTotalReturns").textContent =
+    summary.repTotalReturns;
+  document.getElementById("repReturnChange").textContent =
+    summary.repReturnChange;
 
   document.getElementById("netAdvantage").textContent = summary.netAdvantage;
-  document.getElementById("totalAdvantage").textContent = summary.totalAdvantage;
-  document.getElementById("projectedAdvantage").textContent = summary.projectedAdvantage;
+  document.getElementById("totalAdvantage").textContent =
+    summary.totalAdvantage;
+  document.getElementById("projectedAdvantage").textContent =
+    summary.projectedAdvantage;
 }
-
