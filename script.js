@@ -491,3 +491,37 @@ function renderDailySummary(summary) {
   document.getElementById("projectedAdvantage").textContent =
     summary.projectedAdvantage;
 }
+
+function renderReturnShareTrendChart(recentData, ge2022, ge2020) {
+  const ctx = document.getElementById("shareTrendChart").getContext("2d");
+
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: recentData.map((entry) => entry.date),
+      datasets: [
+        {
+          label: "Democratic Return Share",
+          data: recentData.map((e) => e.Return_Share_Dem),
+          borderColor: "#218ad7ed",
+          fill: false,
+        },
+        {
+          label: "Republican Return Share",
+          data: recentData.map((e) => e.Return_Share_Rep),
+          borderColor: "#fb3232",
+          fill: false,
+        },
+        // Other datasets here
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true, // Ensures Chart.js respects container's aspect ratio
+      scales: {
+        y: { beginAtZero: true, ticks: { callback: (value) => value + "%" } },
+      },
+      plugins: { legend: { labels: { usePointStyle: true } } },
+    },
+  });
+}
