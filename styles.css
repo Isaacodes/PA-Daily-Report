@@ -236,3 +236,61 @@ thead th {
   font-size: 1rem;
   margin-bottom: 0.5rem;
 }
+
+/* Centering setup */
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  text-align: center;
+}
+
+/* Center tab container */
+.tab-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* Center table container */
+.container {
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Center daily summary row */
+.daily-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* Adjusts centering on mobile */
+  gap: 1rem;
+  padding: 10px;
+  max-width: 1200px;
+}
+
+/* Box alignment adjustments */
+.daily-summary-row .box {
+  flex: 1;
+  min-width: 200px;
+  border-radius: 0.25rem;
+  color: #fff;
+  text-align: center;
+  background-color: #323c50;
+}
+
+/* Mobile-specific adjustments for centering */
+@media (max-width: 800px) {
+  .container,
+  .tab-container,
+  .daily-summary-row {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
