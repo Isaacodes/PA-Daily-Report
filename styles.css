@@ -17,13 +17,13 @@ body {
   overflow-x: hidden; /* Prevent horizontal scrolling on the body */
 }
 
-.totals-row {
-  background-color: #503241 !important;
-}
-
 .update {
   font-size: 1rem;
   color: #f57390e0;
+}
+
+.totals-row {
+  background-color: #503241 !important;
 }
 
 h1 {
@@ -32,6 +32,7 @@ h1 {
   line-height: 1em;
   text-align: center;
   color: #4dc3fa;
+  margin: 20px 0;
 }
 
 h2 {
@@ -42,22 +43,24 @@ h2 {
   color: #fb667a;
 }
 
-.container {
+/* New wrapper to handle table scrolling */
+.table-wrapper {
   width: 100%;
-  max-width: 100%;
-  overflow-x: auto; /* Enable horizontal scrolling for the table */
-  margin: 20px 0;
-  padding: 0 20px;
+  overflow-x: auto;
   -webkit-overflow-scrolling: touch; /* Smooth scrolling for touch devices */
-  scrollbar-width: thin; /* Firefox: thin scrollbar */
+  padding: 0 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.container::-webkit-scrollbar {
-  height: 8px; /* Visible scrollbar height */
+.table-wrapper::-webkit-scrollbar {
+  height: 8px;
 }
 
-.container::-webkit-scrollbar-thumb {
-  background-color: #555; /* Scrollbar thumb color */
+.table-wrapper::-webkit-scrollbar-thumb {
+  background-color: #555;
   border-radius: 4px;
 }
 
@@ -83,10 +86,6 @@ thead th {
   font-size: 0.8rem;
 }
 
-.totals-row {
-  background-color: #503241;
-}
-
 /* Background colors for rows */
 .container tr:nth-child(odd) {
   background-color: #323c50;
@@ -98,10 +97,12 @@ thead th {
 
 .tab-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   width: 100%;
   max-width: 1200px;
   margin: 20px 0;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 
 .tab {
@@ -113,6 +114,7 @@ thead th {
   font-size: 1em;
   flex: 1;
   text-align: center;
+  margin: 0 5px;
 }
 
 .tab:hover {
@@ -129,10 +131,12 @@ thead th {
 .daily-summary-row {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: center; /* Center content within viewport */
   gap: 1rem;
   width: 100%;
   max-width: 1200px;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 
 .daily-summary-row .box {
@@ -143,6 +147,7 @@ thead th {
   text-align: center;
   border-radius: 0.25rem;
   padding: 10px;
+  margin: 5px 0;
 }
 
 @media (max-width: 800px) {
@@ -155,6 +160,5 @@ thead th {
   .tab,
   .daily-summary-row .box {
     width: 100%;
-    max-width: 100%;
   }
 }
