@@ -10,19 +10,25 @@ document.addEventListener("DOMContentLoaded", function () {
     "data-10-31-2024.json",
   ];
 
-  // Separate GE files from date-based files
-  const geFiles = files.filter((file) => file.includes("GE"));
-  const dateFiles = files.filter((file) => file.match(/\d{2}-\d{2}-\d{4}/));
+// Separate GE files from date-based files
+const geFiles = files.filter((file) => file.includes("GE"));
+const dateFiles = files.filter((file) => file.match(/\d{2}-\d{2}-\d{4}/));
 
-  // Sort date-based files by descending date (latest to oldest)
-  dateFiles.sort((a, b) => {
-    const dateA = new Date(a.match(/\d{2}-\d{2}-\d{4}/)[0]);
-    const dateB = new Date(b.match(/\d{2}-\d{2}-\d{4}/)[0]);
-    return dateB - dateA;
-  });
+// Sort date-based files by manually parsing the date parts
+dateFiles.sort((a, b) => {
+  const [dayA, monthA, yearA] = a.match(/\d{2}-\d{2}-\d{4}/)[0].split("-").map(Number);
+  const [dayB, monthB, yearB] = b.match(/\d{2}-\d{2}-\d{4}/)[0].split("-").map(Number);
 
-  // Merge sorted date files with GE files
-  files = [...dateFiles, ...geFiles];
+  // Create comparable values with year, month, day order for accurate sorting
+  const dateA = new Date(yearA, monthA - 1, dayA);
+  const dateB = new Date(yearB, monthB - 1, dayB);
+  
+  return dateB - dateA; // Descending order
+});
+
+// Merge sorted date files with GE files
+files = [...dateFiles, ...geFiles];
+
 
   // Create tabs dynamically based on sorted files
   function createTabs() {
