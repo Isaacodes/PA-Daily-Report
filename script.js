@@ -10,25 +10,30 @@ document.addEventListener("DOMContentLoaded", function () {
     "data-10-31-2024.json",
   ];
 
-// Separate GE files from date-based files
-const geFiles = files.filter((file) => file.includes("GE"));
-const dateFiles = files.filter((file) => file.match(/\d{2}-\d{2}-\d{4}/));
+  // Separate GE files from date-based files
+  const geFiles = files.filter((file) => file.includes("GE"));
+  const dateFiles = files.filter((file) => file.match(/\d{2}-\d{2}-\d{4}/));
 
-// Sort date-based files by manually parsing the date parts
-dateFiles.sort((a, b) => {
-  const [dayA, monthA, yearA] = a.match(/\d{2}-\d{2}-\d{4}/)[0].split("-").map(Number);
-  const [dayB, monthB, yearB] = b.match(/\d{2}-\d{2}-\d{4}/)[0].split("-").map(Number);
+  // Sort date-based files by manually parsing the date parts
+  dateFiles.sort((a, b) => {
+    const [dayA, monthA, yearA] = a
+      .match(/\d{2}-\d{2}-\d{4}/)[0]
+      .split("-")
+      .map(Number);
+    const [dayB, monthB, yearB] = b
+      .match(/\d{2}-\d{2}-\d{4}/)[0]
+      .split("-")
+      .map(Number);
 
-  // Create comparable values with year, month, day order for accurate sorting
-  const dateA = new Date(yearA, monthA - 1, dayA);
-  const dateB = new Date(yearB, monthB - 1, dayB);
-  
-  return dateB - dateA; // Descending order
-});
+    // Create comparable values with year, month, day order for accurate sorting
+    const dateA = new Date(yearA, monthA - 1, dayA);
+    const dateB = new Date(yearB, monthB - 1, dayB);
 
-// Merge sorted date files with GE files
-files = [...dateFiles, ...geFiles];
+    return dateB - dateA; // Descending order
+  });
 
+  // Merge sorted date files with GE files
+  files = [...dateFiles, ...geFiles];
 
   // Create tabs dynamically based on sorted files
   function createTabs() {
@@ -62,61 +67,49 @@ files = [...dateFiles, ...geFiles];
         tableBody.innerHTML = "";
 
         const totals = data.find((entry) => entry.County === "TOTAL");
-        let prevTotals = null;
 
-        // Conditions for general election files
-        const isGeneralElection = label.includes("GE");
-        if (isGeneralElection) {
-          fetch(files[0]) // Get latest report for comparison
-            .then((response) => response.json())
-            .then((latestDataArray) => {
-              prevTotals = latestDataArray.find(
-                (entry) => entry.County === "TOTAL"
-              );
-              insertTotalsRowWithDiff(totals, prevTotals);
-            });
-        } else if (
+        // Fetch previous report data if available
+        if (
           fileIndex + 1 < files.length &&
           !files[fileIndex + 1].includes("GE")
         ) {
           fetch(files[fileIndex + 1])
             .then((response) => response.json())
             .then((prevDataArray) => {
-              prevTotals = prevDataArray.find(
+              const prevTotals = prevDataArray.find(
                 (entry) => entry.County === "TOTAL"
               );
               insertTotalsRowWithDiff(totals, prevTotals);
+
+              // Map previous data by County for quick lookup
+              const prevDataMap = {};
+              prevDataArray.forEach((entry) => {
+                prevDataMap[entry.County] = entry;
+              });
+
+              // Separate and sort county rows alphabetically
+              const countyRows = data.filter(
+                (entry) => entry.County !== "TOTAL"
+              );
+              countyRows.sort((a, b) => a.County.localeCompare(b.County));
+
+              // Render sorted county rows with differences
+              countyRows.forEach((row) => {
+                const prevRow = prevDataMap[row.County] || null;
+                insertRowWithDiff(row, prevRow);
+              });
             });
         } else {
+          // No previous data, insert totals row without diff and render counties without diffs
           insertTotalsRowWithDiff(totals, null);
-        }
 
-        // Populate each row with or without differences based on the file
-        data.forEach((row, index) => {
-          if (row.County !== "TOTAL") {
-            let prevData = null;
-            if (isGeneralElection) {
-              fetch(files[0])
-                .then((response) => response.json())
-                .then((latestDataArray) => {
-                  prevData = latestDataArray[index];
-                  insertRowWithDiff(row, prevData);
-                });
-            } else if (
-              fileIndex + 1 < files.length &&
-              !files[fileIndex + 1].includes("GE")
-            ) {
-              fetch(files[fileIndex + 1])
-                .then((response) => response.json())
-                .then((prevDataArray) => {
-                  prevData = prevDataArray[index];
-                  insertRowWithDiff(row, prevData);
-                });
-            } else {
-              insertRowWithDiff(row, null);
-            }
-          }
-        });
+          // Separate and sort county rows alphabetically
+          const countyRows = data.filter((entry) => entry.County !== "TOTAL");
+          countyRows.sort((a, b) => a.County.localeCompare(b.County));
+
+          // Render sorted county rows without differences
+          countyRows.forEach((row) => insertRowWithDiff(row, null));
+        }
       })
       .catch((error) => console.error("Error loading data:", error));
   }
@@ -131,7 +124,7 @@ files = [...dateFiles, ...geFiles];
       const diff = value - prevValue;
       const diffDisplay =
         diff > 0 ? `+${diff.toLocaleString()}` : diff.toLocaleString();
-      return `${value.toLocaleString()}<br><span style="font-size: 0.7em; color: ${diff >= 0 ? "green" : "red"};">(${diffDisplay})</span>`;
+      return `${value.toLocaleString()}<br><span style="font-size: 0.85em; color: ${diff >= 0 ? "green" : "red"};">(${diffDisplay})</span>`;
     }
 
     function formatCellWithPercentage(value, prevValue) {
@@ -141,7 +134,7 @@ files = [...dateFiles, ...geFiles];
         diff > 0 ? `+${diff.toFixed(2)}` : `${diff.toFixed(2)}`;
       return `${value.toFixed(
         2
-      )}%<br><span style="font-size: 0.7em; color: ${diff >= 0 ? "green" : "red"};">(${diffDisplay})</span>`;
+      )}%<br><span style="font-size: 0.85em; color: ${diff >= 0 ? "green" : "red"};">(${diffDisplay})</span>`;
     }
 
     totalsRow.innerHTML = `
@@ -208,7 +201,7 @@ files = [...dateFiles, ...geFiles];
       const diff = value - prevValue;
       const diffDisplay =
         diff > 0 ? `+${diff.toLocaleString()}` : diff.toLocaleString();
-      return `${value.toLocaleString()}<br><span style="font-size: 0.7em; color: ${diff >= 0 ? "green" : "red"};">(${diffDisplay})</span>`;
+      return `${value.toLocaleString()}<br><span style="font-size: 0.85em; color: ${diff >= 0 ? "green" : "red"};">(${diffDisplay})</span>`;
     }
 
     function formatCellWithPercentage(value, prevValue) {
@@ -218,7 +211,7 @@ files = [...dateFiles, ...geFiles];
         diff > 0 ? `+${diff.toFixed(2)}` : `${diff.toFixed(2)}`;
       return `${value.toFixed(
         2
-      )}%<br><span style="font-size: 0.7em; color: ${diff >= 0 ? "green" : "red"};">(${diffDisplay})</span>`;
+      )}%<br><span style="font-size: 0.85em; color: ${diff >= 0 ? "green" : "red"};">(${diffDisplay})</span>`;
     }
 
     tr.innerHTML = `
