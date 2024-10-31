@@ -14,7 +14,11 @@ body {
   padding: 0;
   min-height: 100vh;
   text-align: center;
-  overflow-x: hidden; /* Prevent horizontal scrolling */
+  overflow-x: hidden; /* Prevent horizontal scrolling on the body */
+}
+
+.totals-row {
+  background-color: #503241 !important;
 }
 
 .update {
@@ -40,10 +44,21 @@ h2 {
 
 .container {
   width: 100%;
-  max-width: 1600px;
+  max-width: 100%;
+  overflow-x: auto; /* Enable horizontal scrolling for the table */
   margin: 20px 0;
   padding: 0 20px;
-  overflow-x: auto; /* Enable horizontal scrolling only for the table */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling for touch devices */
+  scrollbar-width: thin; /* Firefox: thin scrollbar */
+}
+
+.container::-webkit-scrollbar {
+  height: 8px; /* Visible scrollbar height */
+}
+
+.container::-webkit-scrollbar-thumb {
+  background-color: #555; /* Scrollbar thumb color */
+  border-radius: 4px;
 }
 
 .container table {
@@ -66,6 +81,10 @@ thead th {
   padding: 10px;
   text-align: left;
   font-size: 0.8rem;
+}
+
+.totals-row {
+  background-color: #503241;
 }
 
 /* Background colors for rows */
