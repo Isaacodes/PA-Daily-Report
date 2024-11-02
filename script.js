@@ -5,32 +5,39 @@ document.addEventListener("DOMContentLoaded", function () {
   let files = [
     "data-2022-GE.json",
     "data-2020-GE.json",
-    "data-10-29-2024.json",
-    "data-10-30-2024.json",
     "data-10-31-2024.json",
+    "data-11-01-2024.json",
+    "data-11-02-2024.json",
   ];
 
   // Separate GE files from date-based files
   const geFiles = files.filter((file) => file.includes("GE"));
   const dateFiles = files.filter((file) => file.match(/\d{2}-\d{2}-\d{4}/));
 
-  // Sort date-based files by manually parsing the date parts
+  // Sort date-based files by parsing the date parts manually
   dateFiles.sort((a, b) => {
-    const [dayA, monthA, yearA] = a
+    // Extract day, month, year as numbers
+    const [monthA, dayA, yearA] = a
       .match(/\d{2}-\d{2}-\d{4}/)[0]
       .split("-")
       .map(Number);
-    const [dayB, monthB, yearB] = b
+    const [monthB, dayB, yearB] = b
       .match(/\d{2}-\d{2}-\d{4}/)[0]
       .split("-")
       .map(Number);
 
-    // Create comparable values with year, month, day order for accurate sorting
-    const dateA = new Date(yearA, monthA - 1, dayA);
-    const dateB = new Date(yearB, monthB - 1, dayB);
-
-    return dateB - dateA; // Descending order
+    // Compare year, then month, then day for more reliable sorting
+    if (yearA !== yearB) {
+      return yearA - yearB;
+    } else if (monthA !== monthB) {
+      return monthA - monthB;
+    } else {
+      return dayA - dayB;
+    }
   });
+
+  // For descending order, simply reverse the result
+  dateFiles.reverse();
 
   // Merge sorted date files with GE files
   files = [...dateFiles, ...geFiles];
@@ -279,22 +286,49 @@ document.addEventListener("DOMContentLoaded", function () {
   );
 });
 
+let dateFiles = [];
+
+// Define dateFiles at a global level
 document.addEventListener("DOMContentLoaded", function () {
   const tableBody = document.querySelector(".container tbody");
   const tabContainer = document.getElementById("tabContainer");
-  const dailySummaryContainer = document.getElementById("daily-share-summary");
 
-  const files = [
+  let files = [
     "data-2022-GE.json",
     "data-2020-GE.json",
-    "data-10-29-2024.json",
-    "data-10-30-2024.json",
     "data-10-31-2024.json",
-  ].sort((a, b) => {
-    const dateA = a.match(/\d{2}-\d{2}-\d{4}/) || a.match(/data-(\d{4})-GE/);
-    const dateB = b.match(/\d{2}-\d{2}-\d{4}/) || b.match(/data-(\d{4})-GE/);
-    return new Date(dateA[0]) - new Date(dateB[0]);
+    "data-11-01-2024.json",
+    "data-11-02-2024.json",
+  ];
+
+  // Separate GE files from date-based files
+  const geFiles = files.filter((file) => file.includes("GE"));
+  dateFiles = files.filter((file) => file.match(/\d{2}-\d{2}-\d{4}/));
+
+  // Sort date-based files by using Date objects for accurate comparison
+  dateFiles.sort((a, b) => {
+    const dateA = new Date(
+      a
+        .match(/\d{2}-\d{2}-\d{4}/)[0]
+        .split("-")
+        .reverse()
+        .join("-")
+    );
+    const dateB = new Date(
+      b
+        .match(/\d{2}-\d{2}-\d{4}/)[0]
+        .split("-")
+        .reverse()
+        .join("-")
+    );
+
+    return dateB - dateA; // Sort in descending order
   });
+
+  // Merge sorted date files with GE files
+  files = [...dateFiles, ...geFiles];
+
+  // Rest of your code here...
 
   function calculateDailySummary(latest, previous) {
     const calcChange = (a, b) => (a - b).toFixed(1);
@@ -525,3 +559,26 @@ function renderReturnShareTrendChart(recentData, ge2022, ge2020) {
     },
   });
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+  const tableWrapper = document.querySelector(".table-wrapper");
+  const table = document.querySelector(".container");
+  const originalThead = table.querySelector("thead");
+
+  // Create and style the cloned header for sticky effect
+  //const stickyHeader = originalThead.cloneNode(true);
+  //stickyHeader.classList.add("sticky-header");
+  //tableWrapper.appendChild(stickyHeader);
+
+  // Sync column widths between original and sticky header
+  // function syncHeaderWidths() {
+  //   const originalThs = originalThead.querySelectorAll("th");
+  //   //const stickyThs = stickyHeader.querySelectorAll("th");
+  //   stickyThs.forEach((th, index) => {
+  //     th.style.width = `${originalThs[index].offsetWidth}px`;
+  //   });
+  // }
+
+  // Update widths when the window is resized
+  window.addEventListener("resize", syncHeaderWidths);
+});
