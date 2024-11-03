@@ -12,7 +12,7 @@
         class="blue"
         >&gt;</span
       >
-      <p class="update">updated through 11//02/2024 8:00 AM</p>
+      <p class="update">updated through 11//03/2024 8:00 AM</p>
     </h1>
 
     <!-- Tab container to hold the date tabs -->
@@ -20,22 +20,38 @@
 
     <!-- Wrapper for table to control horizontal scrolling -->
     <div class="table-wrapper">
-      <table class="container">
+      <table class="container" id="reportTable">
         <thead class="stick">
           <tr>
-            <th>County</th>
-            <th>Total Requests</th>
-            <th>Total Returns</th>
-            <th>Requests (D)</th>
-            <th>Requests (R)</th>
-            <th>Requests (NPA)</th>
-            <th>Returns (D)</th>
-            <th>Returns (R)</th>
-            <th>Returns (NPA)</th>
-            <th>Request Share (D)</th>
-            <th>Request Share (R)</th>
-            <th>Return Share (D)</th>
-            <th>Return Share (R)</th>
+            <th data-sort-type="string" onclick="sortTable(0)">County</th>
+            <th data-sort-type="number" onclick="sortTable(1)">
+              Total Requests
+            </th>
+            <th data-sort-type="number" onclick="sortTable(2)">
+              Total Returns
+            </th>
+            <th data-sort-type="number" onclick="sortTable(3)">Requests (D)</th>
+            <th data-sort-type="number" onclick="sortTable(4)">Requests (R)</th>
+            <th data-sort-type="number" onclick="sortTable(5)">
+              Requests (NPA)
+            </th>
+            <th data-sort-type="number" onclick="sortTable(6)">Returns (D)</th>
+            <th data-sort-type="number" onclick="sortTable(7)">Returns (R)</th>
+            <th data-sort-type="number" onclick="sortTable(8)">
+              Returns (NPA)
+            </th>
+            <th data-sort-type="number" onclick="sortTable(9)">
+              Request Share (D)
+            </th>
+            <th data-sort-type="number" onclick="sortTable(10)">
+              Request Share (R)
+            </th>
+            <th data-sort-type="number" onclick="sortTable(11)">
+              Return Share (D)
+            </th>
+            <th data-sort-type="number" onclick="sortTable(12)">
+              Return Share (R)
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -47,32 +63,20 @@
     <section class="daily-summary-row mt-4">
       <div class="box bg-primary p-3">
         <h3>Returns Share</h3>
+        <p>🔵 Democratic: <span id="demReturnShare"></span>%</p>
+        <p>🔴 Republican: <span id="repReturnShare"></span>%</p>
         <p>
-          🔵 Democratic: <span id="demReturnShare"></span>% (<span
-            id="demReturnShareChange"
-          ></span
-          >)
-        </p>
-        <p>
-          🔴 Republican: <span id="repReturnShare"></span>% (<span
-            id="repReturnShareChange"
-          ></span
-          >)
+          Net Return Share Difference:
+          <span id="netReturnShareDifference"></span>
         </p>
       </div>
       <div class="box bg-danger p-3">
         <h3>Total Returns</h3>
+        <p>🔵 Democratic: <span id="demTotalReturns"></span></p>
+        <p>🔴 Republican: <span id="repTotalReturns"></span></p>
         <p>
-          🔵 Democratic: <span id="demTotalReturns"></span> (+<span
-            id="demReturnChange"
-          ></span
-          >)
-        </p>
-        <p>
-          🔴 Republican: <span id="repTotalReturns"></span> (+<span
-            id="repReturnChange"
-          ></span
-          >)
+          Net Total Returns Difference:
+          <span id="netTotalReturnsDifference"></span>
         </p>
       </div>
       <div class="box bg-warning p-3">
@@ -94,5 +98,58 @@
 
     <script src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      let sortOrder = {};
+      function sortTable(columnIndex) {
+        const table = document.getElementById("reportTable");
+        const tbody = table.tBodies[0];
+        const rows = Array.from(tbody.rows);
+
+        // Find and remove the totals row before sorting
+        const totalsRow = rows.find((row) =>
+          row.classList.contains("totals-row")
+        );
+        const otherRows = rows.filter(
+          (row) => !row.classList.contains("totals-row")
+        );
+
+        // Define sorting direction
+        if (!sortOrder[columnIndex]) {
+          sortOrder[columnIndex] = "asc";
+        } else {
+          sortOrder[columnIndex] =
+            sortOrder[columnIndex] === "asc" ? "desc" : "asc";
+        }
+
+        const dataType =
+          table.tHead.rows[0].cells[columnIndex].dataset.sortType;
+
+        otherRows.sort((a, b) => {
+          const cellA = a.cells[columnIndex].innerText;
+          const cellB = b.cells[columnIndex].innerText;
+
+          let valueA, valueB;
+
+          if (dataType === "number") {
+            valueA = parseFloat(cellA.replace(/,/g, "")) || 0;
+            valueB = parseFloat(cellB.replace(/,/g, "")) || 0;
+          } else if (dataType === "string") {
+            valueA = cellA.toLowerCase();
+            valueB = cellB.toLowerCase();
+          }
+
+          if (sortOrder[columnIndex] === "asc") {
+            return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+          } else {
+            return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+          }
+        });
+
+        // Clear tbody and re-append rows
+        tbody.innerHTML = "";
+        if (totalsRow) tbody.appendChild(totalsRow); // Add totals row at the top
+        otherRows.forEach((row) => tbody.appendChild(row));
+      }
+    </script>
   </body>
 </html>

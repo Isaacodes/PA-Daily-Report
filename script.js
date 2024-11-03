@@ -2,49 +2,39 @@ document.addEventListener("DOMContentLoaded", function () {
   const tableBody = document.querySelector(".container tbody");
   const tabContainer = document.getElementById("tabContainer");
 
+  // Initial unsorted file list
   let files = [
     "data-2022-GE.json",
     "data-2020-GE.json",
     "data-10-31-2024.json",
     "data-11-01-2024.json",
     "data-11-02-2024.json",
+    "data-11-03-2024.json",
   ];
 
-  // Separate GE files from date-based files
-  const geFiles = files.filter((file) => file.includes("GE"));
-  const dateFiles = files.filter((file) => file.match(/\d{2}-\d{2}-\d{4}/));
+  // Single sorting function for date-based and GE files
+  function sortFiles(files) {
+    const geFiles = files.filter((file) => file.includes("GE"));
+    const dateFiles = files
+      .filter((file) => /\d{2}-\d{2}-\d{4}/.test(file))
+      .map((file) => {
+        const [month, day, year] = file
+          .match(/\d{2}-\d{2}-\d{4}/)[0]
+          .split("-");
+        return { filename: file, date: new Date(year, month - 1, day) };
+      })
+      .sort((a, b) => b.date - a.date) // Sort in descending order
+      .map((fileObj) => fileObj.filename); // Map back to filenames
 
-  // Sort date-based files by parsing the date parts manually
-  dateFiles.sort((a, b) => {
-    // Extract day, month, year as numbers
-    const [monthA, dayA, yearA] = a
-      .match(/\d{2}-\d{2}-\d{4}/)[0]
-      .split("-")
-      .map(Number);
-    const [monthB, dayB, yearB] = b
-      .match(/\d{2}-\d{2}-\d{4}/)[0]
-      .split("-")
-      .map(Number);
+    return [...dateFiles, ...geFiles];
+  }
 
-    // Compare year, then month, then day for more reliable sorting
-    if (yearA !== yearB) {
-      return yearA - yearB;
-    } else if (monthA !== monthB) {
-      return monthA - monthB;
-    } else {
-      return dayA - dayB;
-    }
-  });
+  // Sort files initially and store them in sortedFiles
+  const sortedFiles = sortFiles(files);
 
-  // For descending order, simply reverse the result
-  dateFiles.reverse();
-
-  // Merge sorted date files with GE files
-  files = [...dateFiles, ...geFiles];
-
-  // Create tabs dynamically based on sorted files
+  // Function to create tabs based on sorted files
   function createTabs() {
-    files.forEach((file, index) => {
+    sortedFiles.forEach((file, index) => {
       const dateMatch = file.match(/\d{2}-\d{2}-\d{4}/);
       const label = dateMatch
         ? dateMatch[0]
@@ -58,7 +48,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Function to load and display report data based on file selection
   function loadReport(file, label, fileIndex) {
     document
       .querySelectorAll(".tab")
@@ -72,15 +61,14 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((response) => response.json())
       .then((data) => {
         tableBody.innerHTML = "";
-
         const totals = data.find((entry) => entry.County === "TOTAL");
 
         // Fetch previous report data if available
         if (
-          fileIndex + 1 < files.length &&
-          !files[fileIndex + 1].includes("GE")
+          fileIndex + 1 < sortedFiles.length &&
+          !sortedFiles[fileIndex + 1].includes("GE")
         ) {
-          fetch(files[fileIndex + 1])
+          fetch(sortedFiles[fileIndex + 1])
             .then((response) => response.json())
             .then((prevDataArray) => {
               const prevTotals = prevDataArray.find(
@@ -88,40 +76,30 @@ document.addEventListener("DOMContentLoaded", function () {
               );
               insertTotalsRowWithDiff(totals, prevTotals);
 
-              // Map previous data by County for quick lookup
               const prevDataMap = {};
               prevDataArray.forEach((entry) => {
                 prevDataMap[entry.County] = entry;
               });
 
-              // Separate and sort county rows alphabetically
               const countyRows = data.filter(
                 (entry) => entry.County !== "TOTAL"
               );
               countyRows.sort((a, b) => a.County.localeCompare(b.County));
-
-              // Render sorted county rows with differences
               countyRows.forEach((row) => {
                 const prevRow = prevDataMap[row.County] || null;
                 insertRowWithDiff(row, prevRow);
               });
             });
         } else {
-          // No previous data, insert totals row without diff and render counties without diffs
           insertTotalsRowWithDiff(totals, null);
-
-          // Separate and sort county rows alphabetically
           const countyRows = data.filter((entry) => entry.County !== "TOTAL");
           countyRows.sort((a, b) => a.County.localeCompare(b.County));
-
-          // Render sorted county rows without differences
           countyRows.forEach((row) => insertRowWithDiff(row, null));
         }
       })
       .catch((error) => console.error("Error loading data:", error));
   }
 
-  // Insert totals row with or without differences
   function insertTotalsRowWithDiff(totals, prevTotals) {
     const totalsRow = document.createElement("tr");
     totalsRow.classList.add("totals-row");
@@ -145,61 +123,59 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     totalsRow.innerHTML = `
-    <td><strong>Totals</strong></td>
-    <td>${formatCell(
-      totals.Total_Approved,
-      prevTotals ? prevTotals.Total_Approved : null
-    )}</td>
-    <td>${formatCell(
-      totals.Total_Returned,
-      prevTotals ? prevTotals.Total_Returned : null
-    )}</td>
-    <td>${formatCell(
-      totals.Raw_Dem_Approved,
-      prevTotals ? prevTotals.Raw_Dem_Approved : null
-    )}</td>
-    <td>${formatCell(
-      totals.Raw_Rep_Approved,
-      prevTotals ? prevTotals.Raw_Rep_Approved : null
-    )}</td>
-    <td>${formatCell(
-      totals.Raw_Oth_Approved,
-      prevTotals ? prevTotals.Raw_Oth_Approved : null
-    )}</td>
-    <td>${formatCell(
-      totals.Raw_Dem_Returned,
-      prevTotals ? prevTotals.Raw_Dem_Returned : null
-    )}</td>
-    <td>${formatCell(
-      totals.Raw_Rep_Returned,
-      prevTotals ? prevTotals.Raw_Rep_Returned : null
-    )}</td>
-    <td>${formatCell(
-      totals.Raw_Oth_Returned,
-      prevTotals ? prevTotals.Raw_Oth_Returned : null
-    )}</td>
-    <td>${formatCellWithPercentage(
-      totals.Request_Share_Dem,
-      prevTotals ? prevTotals.Request_Share_Dem : null
-    )}</td>
-    <td>${formatCellWithPercentage(
-      totals.Request_Share_Rep,
-      prevTotals ? prevTotals.Request_Share_Rep : null
-    )}</td>
-    <td>${formatCellWithPercentage(
-      totals.Return_Share_Dem,
-      prevTotals ? prevTotals.Return_Share_Dem : null
-    )}</td>
-    <td>${formatCellWithPercentage(
-      totals.Return_Share_Rep,
-      prevTotals ? prevTotals.Return_Share_Rep : null
-    )}</td>
-  `;
-
-    tableBody.prepend(totalsRow); // Use prepend instead of appendChild
+      <td><strong>Totals</strong></td>
+      <td>${formatCell(
+        totals.Total_Approved,
+        prevTotals ? prevTotals.Total_Approved : null
+      )}</td>
+      <td>${formatCell(
+        totals.Total_Returned,
+        prevTotals ? prevTotals.Total_Returned : null
+      )}</td>
+      <td>${formatCell(
+        totals.Raw_Dem_Approved,
+        prevTotals ? prevTotals.Raw_Dem_Approved : null
+      )}</td>
+      <td>${formatCell(
+        totals.Raw_Rep_Approved,
+        prevTotals ? prevTotals.Raw_Rep_Approved : null
+      )}</td>
+      <td>${formatCell(
+        totals.Raw_Oth_Approved,
+        prevTotals ? prevTotals.Raw_Oth_Approved : null
+      )}</td>
+      <td>${formatCell(
+        totals.Raw_Dem_Returned,
+        prevTotals ? prevTotals.Raw_Dem_Returned : null
+      )}</td>
+      <td>${formatCell(
+        totals.Raw_Rep_Returned,
+        prevTotals ? prevTotals.Raw_Rep_Returned : null
+      )}</td>
+      <td>${formatCell(
+        totals.Raw_Oth_Returned,
+        prevTotals ? prevTotals.Raw_Oth_Returned : null
+      )}</td>
+      <td>${formatCellWithPercentage(
+        totals.Request_Share_Dem,
+        prevTotals ? prevTotals.Request_Share_Dem : null
+      )}</td>
+      <td>${formatCellWithPercentage(
+        totals.Request_Share_Rep,
+        prevTotals ? prevTotals.Request_Share_Rep : null
+      )}</td>
+      <td>${formatCellWithPercentage(
+        totals.Return_Share_Dem,
+        prevTotals ? prevTotals.Return_Share_Dem : null
+      )}</td>
+      <td>${formatCellWithPercentage(
+        totals.Return_Share_Rep,
+        prevTotals ? prevTotals.Return_Share_Rep : null
+      )}</td>
+    `;
+    tableBody.prepend(totalsRow);
   }
 
-  // Insert row for each county with or without differences
   function insertRowWithDiff(row, prevData) {
     const tr = document.createElement("tr");
 
@@ -278,10 +254,10 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize tabs and load the most recent report
   createTabs();
   loadReport(
-    files[0],
-    files[0].match(/\d{2}-\d{2}-\d{4}/)
-      ? files[0].match(/\d{2}-\d{2}-\d{4}/)[0]
-      : files[0].replace("data-", "").replace(".json", ""),
+    sortedFiles[0],
+    sortedFiles[0].match(/\d{2}-\d{2}-\d{4}/)
+      ? sortedFiles[0].match(/\d{2}-\d{2}-\d{4}/)[0]
+      : sortedFiles[0].replace("data-", "").replace(".json", ""),
     0
   );
 });
@@ -292,6 +268,9 @@ let dateFiles = [];
 document.addEventListener("DOMContentLoaded", function () {
   const tableBody = document.querySelector(".container tbody");
   const tabContainer = document.getElementById("tabContainer");
+  const dailySummaryContainer = document.getElementById(
+    "dailySummaryContainer"
+  ); // Moved inside DOMContentLoaded
 
   let files = [
     "data-2022-GE.json",
@@ -299,36 +278,58 @@ document.addEventListener("DOMContentLoaded", function () {
     "data-10-31-2024.json",
     "data-11-01-2024.json",
     "data-11-02-2024.json",
+    "data-11-03-2024.json",
   ];
 
-  // Separate GE files from date-based files
+  // Separate GE files and sort date-based files
   const geFiles = files.filter((file) => file.includes("GE"));
-  dateFiles = files.filter((file) => file.match(/\d{2}-\d{2}-\d{4}/));
+  let dateFiles = files.filter((file) => /\d{2}-\d{2}-\d{4}/.test(file));
 
-  // Sort date-based files by using Date objects for accurate comparison
   dateFiles.sort((a, b) => {
-    const dateA = new Date(
-      a
-        .match(/\d{2}-\d{2}-\d{4}/)[0]
-        .split("-")
-        .reverse()
-        .join("-")
+    const [monthA, dayA, yearA] = a.match(/\d{2}-\d{2}-\d{4}/)[0].split("-");
+    const [monthB, dayB, yearB] = b.match(/\d{2}-\d{2}-\d{4}/)[0].split("-");
+    return (
+      new Date(yearB, monthB - 1, dayB) - new Date(yearA, monthA - 1, dayA)
     );
-    const dateB = new Date(
-      b
-        .match(/\d{2}-\d{2}-\d{4}/)[0]
-        .split("-")
-        .reverse()
-        .join("-")
-    );
-
-    return dateB - dateA; // Sort in descending order
   });
 
-  // Merge sorted date files with GE files
-  files = [...dateFiles, ...geFiles];
+  files = [...dateFiles, ...geFiles]; // Merged and sorted list
 
-  // Rest of your code here...
+  function loadData() {
+    Promise.all(files.map((file) => fetch(file).then((res) => res.json())))
+      .then((data) => {
+        const totalData = data.map((report, i) => {
+          const entry = report.find((entry) => entry.County === "TOTAL");
+
+          // Get date from filename
+          const dateMatch = files[i].match(/\d{2}-\d{2}-\d{4}/);
+          const date = dateMatch
+            ? dateMatch[0]
+            : files[i].replace("data-", "").replace(".json", "");
+
+          return { ...entry, date };
+        });
+
+        // Separate GE 2022 and GE 2020 data for baseline
+        const ge2022 = totalData.find((entry) => entry.date.includes("2022"));
+        const ge2020 = totalData.find((entry) => entry.date.includes("2020"));
+
+        // Sort `totalData` in descending date order for recent reports
+        const recentData = totalData
+          .filter((entry) => !entry.date.includes("GE"))
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .slice(0, 3); // Get the three most recent entries
+
+        const [latest, previous, secondPrevious] = recentData;
+
+        // Use the latest two comparisons for daily summary calculations
+        renderDailySummary(calculateDailySummary(latest, previous));
+
+        // Render the chart with the last three reports and the GE baselines
+        renderReturnShareTrendChart(recentData, ge2022, ge2020);
+      })
+      .catch((error) => console.error("Error loading data:", error));
+  }
 
   function calculateDailySummary(latest, previous) {
     const calcChange = (a, b) => (a - b).toFixed(1);
@@ -356,6 +357,26 @@ document.addEventListener("DOMContentLoaded", function () {
       repReturnChange: (
         latest.Rep_Returned - previous.Rep_Returned
       ).toLocaleString(),
+
+      // Net difference in return share
+      netReturnShareDifference: (
+        latest.Return_Share_Dem - latest.Return_Share_Rep
+      ).toFixed(1),
+      netReturnShareChange: calcChange(
+        latest.Return_Share_Dem - latest.Return_Share_Rep,
+        previous.Return_Share_Dem - previous.Return_Share_Rep
+      ),
+
+      // Net total returns difference
+      netTotalReturnsDifference: (
+        latest.Dem_Returned - latest.Rep_Returned
+      ).toLocaleString(),
+      netTotalReturnsChange: (
+        latest.Dem_Returned -
+        previous.Dem_Returned -
+        (latest.Rep_Returned - previous.Rep_Returned)
+      ).toLocaleString(),
+
       netAdvantage: (
         latest.Dem_Returned -
         previous.Dem_Returned -
@@ -369,22 +390,69 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function renderDailySummary(summary) {
-    dailySummaryContainer.innerHTML = `
-      <div class="daily-summary">
-        <h3>Returns Share</h3>
-        <p>🔵 ${summary.demReturnShare}% (${summary.demReturnShareChange})</p>
-        <p>🔴 ${summary.repReturnShare}% (${summary.repReturnShareChange})</p>
-        <h3>Total Returns</h3>
-        <p>🔵 ${summary.demTotalReturns} (+${summary.demReturnChange})</p>
-        <p>🔴 ${summary.repTotalReturns} (+${summary.repReturnChange})</p>
-        <h3>Daily Net Advantage</h3>
-        <p>🔵 ${summary.netAdvantage}</p>
-        <h3>Total Advantage</h3>
-        <p>🔵 ${summary.totalAdvantage}</p>
-        <h3>If 100% of Outstanding Ballots Returned</h3>
-        <p>🔵 ${summary.projectedAdvantage}</p>
-      </div>
-    `;
+    const demReturnShareElem = document.getElementById("demReturnShare");
+    const demReturnShareChangeElem = document.getElementById(
+      "demReturnShareChange"
+    );
+    const repReturnShareElem = document.getElementById("repReturnShare");
+    const repReturnShareChangeElem = document.getElementById(
+      "repReturnShareChange"
+    );
+    const demTotalReturnsElem = document.getElementById("demTotalReturns");
+    const demReturnChangeElem = document.getElementById("demReturnChange");
+    const repTotalReturnsElem = document.getElementById("repTotalReturns");
+    const repReturnChangeElem = document.getElementById("repReturnChange");
+    const netAdvantageElem = document.getElementById("netAdvantage");
+    const totalAdvantageElem = document.getElementById("totalAdvantage");
+    const projectedAdvantageElem =
+      document.getElementById("projectedAdvantage");
+
+    if (demReturnShareElem)
+      demReturnShareElem.textContent = `${summary.demReturnShare} (${summary.demReturnShareChange})`;
+    if (repReturnShareElem)
+      repReturnShareElem.textContent = `${summary.repReturnShare} (${summary.repReturnShareChange})`;
+    if (demTotalReturnsElem)
+      demTotalReturnsElem.textContent = `${summary.demTotalReturns} (+${summary.demReturnChange})`;
+    if (repTotalReturnsElem)
+      repTotalReturnsElem.textContent = `${summary.repTotalReturns} (+${summary.repReturnChange})`;
+
+    if (netAdvantageElem) netAdvantageElem.textContent = summary.netAdvantage;
+    if (totalAdvantageElem)
+      totalAdvantageElem.textContent = summary.totalAdvantage;
+    if (projectedAdvantageElem)
+      projectedAdvantageElem.textContent = summary.projectedAdvantage;
+
+    // Display the net differences in a separate section
+    const netReturnShareDifferenceElem = document.getElementById(
+      "netReturnShareDifference"
+    );
+    const netTotalReturnsDifferenceElem = document.getElementById(
+      "netTotalReturnsDifference"
+    );
+
+    // Ensure values are valid numbers to avoid NaN
+    const netReturnShareDifference = !isNaN(summary.netReturnShareDifference)
+      ? summary.netReturnShareDifference
+      : 0;
+    const netTotalReturnsDifference = !isNaN(summary.netTotalReturnsDifference)
+      ? summary.netTotalReturnsDifference
+      : 0;
+    const netReturnShareChange = !isNaN(summary.netReturnShareChange)
+      ? summary.netReturnShareChange
+      : 0;
+
+    if (netReturnShareDifferenceElem) {
+      const prefix = netReturnShareDifference > 0 ? "D +" : "R +";
+      netReturnShareDifferenceElem.textContent = `${prefix}${Math.abs(
+        netReturnShareDifference
+      )} (${netReturnShareChange})`;
+    }
+    if (netTotalReturnsDifferenceElem) {
+      const prefix = netTotalReturnsDifference > 0 ? "D +" : "R +";
+      netTotalReturnsDifferenceElem.textContent = `${prefix}${Math.abs(
+        netTotalReturnsDifference
+      )}`;
+    }
   }
 
   function renderReturnShareTrendChart(recentData, ge2022, ge2020) {
@@ -409,28 +477,28 @@ document.addEventListener("DOMContentLoaded", function () {
           },
           {
             label: "2022 GE - D",
-            data: Array(3).fill(ge2022.Return_Share_Dem),
+            data: Array(recentData.length).fill(ge2022.Return_Share_Dem),
             borderColor: "#218ad7",
             borderDash: [5, 5],
             pointRadius: 0,
           },
           {
             label: "2022 GE - R",
-            data: Array(3).fill(ge2022.Return_Share_Rep),
+            data: Array(recentData.length).fill(ge2022.Return_Share_Rep),
             borderColor: "#fb3232",
             borderDash: [5, 5],
             pointRadius: 0,
           },
           {
             label: "2020 GE - D",
-            data: Array(3).fill(ge2020.Return_Share_Dem),
+            data: Array(recentData.length).fill(ge2020.Return_Share_Dem),
             borderColor: "#0d4b8d",
             borderDash: [5, 5],
             pointRadius: 0,
           },
           {
             label: "2020 GE - R",
-            data: Array(3).fill(ge2020.Return_Share_Rep),
+            data: Array(recentData.length).fill(ge2020.Return_Share_Rep),
             borderColor: "#c22121",
             borderDash: [5, 5],
             pointRadius: 0,
@@ -440,125 +508,26 @@ document.addEventListener("DOMContentLoaded", function () {
       options: {
         responsive: true,
         scales: {
-          y: { beginAtZero: true, ticks: { callback: (value) => value + "%" } },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: (value) => value + "%",
+            },
+          },
         },
-        plugins: { legend: { labels: { usePointStyle: true } } },
+        plugins: {
+          legend: {
+            labels: {
+              usePointStyle: true,
+            },
+          },
+        },
       },
     });
   }
 
-  function loadData() {
-    Promise.all(files.map((file) => fetch(file).then((res) => res.json())))
-      .then((data) => {
-        const totalData = data.map((report, i) => ({
-          ...report.find((entry) => entry.County === "TOTAL"),
-          date: files[i].match(/\d{2}-\d{2}-\d{4}/)
-            ? files[i].match(/\d{2}-\d{2}-\d{4}/)[0]
-            : files[i].match(/data-(\d{4})-GE/)[0],
-        }));
-
-        const recentData = totalData
-          .filter((entry) => !entry.date.includes("GE"))
-          .slice(-3);
-        const [ge2022, ge2020] = [
-          totalData.find((e) => e.date.includes("2022")),
-          totalData.find((e) => e.date.includes("2020")),
-        ];
-
-        renderDailySummary(calculateDailySummary(recentData[2], recentData[1]));
-        renderReturnShareTrendChart(recentData, ge2022, ge2020);
-      })
-      .catch((error) => console.error("Error loading data:", error));
-  }
-
-  function renderDailySummary(summary) {
-    document.getElementById("demReturnShare").textContent =
-      summary.demReturnShare;
-    document.getElementById("demReturnShareChange").textContent =
-      summary.demReturnShareChange;
-    document.getElementById("repReturnShare").textContent =
-      summary.repReturnShare;
-    document.getElementById("repReturnShareChange").textContent =
-      summary.repReturnShareChange;
-
-    document.getElementById("demTotalReturns").textContent =
-      summary.demTotalReturns;
-    document.getElementById("demReturnChange").textContent =
-      summary.demReturnChange;
-    document.getElementById("repTotalReturns").textContent =
-      summary.repTotalReturns;
-    document.getElementById("repReturnChange").textContent =
-      summary.repReturnChange;
-
-    document.getElementById("netAdvantage").textContent = summary.netAdvantage;
-    document.getElementById("totalAdvantage").textContent =
-      summary.totalAdvantage;
-    document.getElementById("projectedAdvantage").textContent =
-      summary.projectedAdvantage;
-  }
-
-  loadData();
+  loadData(); // Load data on DOMContentLoaded
 });
-
-function renderDailySummary(summary) {
-  document.getElementById("demReturnShare").textContent =
-    summary.demReturnShare;
-  document.getElementById("demReturnShareChange").textContent =
-    summary.demReturnShareChange;
-  document.getElementById("repReturnShare").textContent =
-    summary.repReturnShare;
-  document.getElementById("repReturnShareChange").textContent =
-    summary.repReturnShareChange;
-
-  document.getElementById("demTotalReturns").textContent =
-    summary.demTotalReturns;
-  document.getElementById("demReturnChange").textContent =
-    summary.demReturnChange;
-  document.getElementById("repTotalReturns").textContent =
-    summary.repTotalReturns;
-  document.getElementById("repReturnChange").textContent =
-    summary.repReturnChange;
-
-  document.getElementById("netAdvantage").textContent = summary.netAdvantage;
-  document.getElementById("totalAdvantage").textContent =
-    summary.totalAdvantage;
-  document.getElementById("projectedAdvantage").textContent =
-    summary.projectedAdvantage;
-}
-
-function renderReturnShareTrendChart(recentData, ge2022, ge2020) {
-  const ctx = document.getElementById("shareTrendChart").getContext("2d");
-
-  new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: recentData.map((entry) => entry.date),
-      datasets: [
-        {
-          label: "Democratic Return Share",
-          data: recentData.map((e) => e.Return_Share_Dem),
-          borderColor: "#218ad7ed",
-          fill: false,
-        },
-        {
-          label: "Republican Return Share",
-          data: recentData.map((e) => e.Return_Share_Rep),
-          borderColor: "#fb3232",
-          fill: false,
-        },
-        // Other datasets here
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true, // Ensures Chart.js respects container's aspect ratio
-      scales: {
-        y: { beginAtZero: true, ticks: { callback: (value) => value + "%" } },
-      },
-      plugins: { legend: { labels: { usePointStyle: true } } },
-    },
-  });
-}
 
 document.addEventListener("DOMContentLoaded", function () {
   const tableWrapper = document.querySelector(".table-wrapper");
