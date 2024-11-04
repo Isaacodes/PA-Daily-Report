@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     "data-11-01-2024.json",
     "data-11-02-2024.json",
     "data-11-03-2024.json",
+    "data-11-04-2024.json",
   ];
 
   // Single sorting function for date-based and GE files
@@ -279,6 +280,7 @@ document.addEventListener("DOMContentLoaded", function () {
     "data-11-01-2024.json",
     "data-11-02-2024.json",
     "data-11-03-2024.json",
+    "data-11-04-2024.json",
   ];
 
   // Separate GE files and sort date-based files
